@@ -1,34 +1,37 @@
 <template>
-    <div id="app">
-        <main class="gallery-page">
+    <div class="page">
 
-            <!-- Header -->
-            <header class="gallery-header">
-                <h1>Our Gallery</h1>
-                <div class="ornament">
-                    <span></span>
-                </div>
-            </header>
-
-            <!-- Gallery -->
-            <section class="gallery" :style="{ gridTemplateColumns: `repeat(${columns}, 1fr)` }">
-                <div v-for="(image, index) in images" :key="index" class="gallery-item" @click="openLightbox(index)">
-                    <img :src="image" :alt="`Prewedding photo ${index + 1}`" loading="lazy" />
-                </div>
-            </section>
-
-            <!-- Slider -->
-            <div class="slider-wrapper">
-                <input v-model.number="columns" type="range" min="1" max="4" step="1" class="gallery-slider" />
-                <div class="slider-labels">
-                    <span>Large</span>
-                    <span>Small</span>
-                </div>
+        <!-- Header -->
+        <section class="header">
+            <h1>Our Gallery</h1>
+            <div class="ornament">
+                <span></span>
             </div>
+        </section>
 
-            <!-- Lightbox -->
-            <vue-easy-lightbox :visible="lightboxVisible" :imgs="images" :index="lightboxIndex" @hide="closeLightbox" />
-        </main>
+        <!-- Gallery -->
+        <section class="gallery" :style="{ columnCount: columns }">
+            <div v-for="(image, index) in images" :key="image.name" class="gallery-item" @click="openLightbox(index)">
+                <img :src="image.thumbnail" :alt="image.alt" loading="lazy" decoding="async">
+            </div>
+        </section>
+
+        <!-- Slider -->
+        <div class="gallery-control">
+            <span class="control-label">+</span>
+            <input
+                v-model.number="columns"
+                type="range"
+                min="1"
+                max="4"
+                step="1"
+                aria-label="Gallery size"
+            >
+            <span class="control-label">-</span>
+        </div>
+
+        <!-- Lightbox -->
+        <vue-easy-lightbox :visible="visible" :imgs="lightboxImages" :index="lightboxIndex" @hide="visible = false" />
     </div>
 </template>
 
@@ -43,33 +46,47 @@ export default {
     data() {
         return {
             columns: 2,
-            lightboxVisible: false,
+            visible: false,
             lightboxIndex: 0,
-            images: [
-                `${process.env.BASE_URL}images/image-1.jpeg`,
-                `${process.env.BASE_URL}images/image-2.jpeg`,
-                `${process.env.BASE_URL}images/image-3.jpeg`,
-                `${process.env.BASE_URL}images/image-4.jpeg`,
-                `${process.env.BASE_URL}images/image-5.jpeg`,
-                `${process.env.BASE_URL}images/image-6.jpeg`,
-                `${process.env.BASE_URL}images/image-7.jpeg`,
-                `${process.env.BASE_URL}images/image-8.jpeg`,
-                `${process.env.BASE_URL}images/image-9.jpeg`,
-                `${process.env.BASE_URL}images/image-10.jpeg`,
-                `${process.env.BASE_URL}images/image-11.jpeg`,
-                `${process.env.BASE_URL}images/image-12.jpeg`
-            ]
+            imageCount: 12, // edit here
         }
     },
+    mounted() {
+        this.setTitle()
+    },
     methods: {
+        setTitle() {
+            document.title = `Satrio & Sabilla's Wedding`
+        },
         openLightbox(index) {
             this.lightboxIndex = index
-            this.lightboxVisible = true
+            this.visible = true
         },
-        closeLightbox() {
-            this.lightboxVisible = false
+    },
+    computed: {
+        images() {
+            return Array.from(
+                { length: this.imageCount },
+                (_, index) => {
+                    const name = `image-${index + 1}`
+                    return {
+                        name,
+                        thumbnail: `${process.env.BASE_URL}images/thumbnails/${name}.webp`,
+                        original: `${process.env.BASE_URL}images/${name}.jpeg`,
+                        alt: `Prewedding photo ${index + 1}`
+                    }
+                }
+            )
+        },
+        lightboxImages() {
+            return this.images.map(image => {
+                return {
+                    src: image.original,
+                    title: image.alt
+                }
+            })
         }
-    }
+    },
 }
 </script>
 
@@ -78,63 +95,62 @@ export default {
     box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
     margin: 0;
     padding: 0;
-    background: #ffffff;
 }
-
 body {
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-}
-
-#app {
-    min-height: 100vh;
-}
-
-/* =========================
-   PAGE
-========================= */
-
-.gallery-page {
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 35px 20px 60px;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.gallery-header {
-    text-align: center;
-    margin-bottom: 35px;
-}
-
-.gallery-header h1 {
     margin: 0;
-    font-family: Georgia, serif;
-    font-size: 48px;
-    font-weight: 400;
-    letter-spacing: 1px;
-    color: #222;
+    color: #1c325b;
+    font-family: "Montserrat", sans-serif;
+    background-color: #D4E2D4;
+    background-image:
+        radial-gradient(
+            rgba(101, 174, 125, 0.305) 0.8px,
+            transparent 0.8px
+        ),
+        radial-gradient(
+            rgba(174, 112, 255, 0.327) 0.8px,
+            transparent 0.8px
+        );
+    background-size: 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px;
+}
+.page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 30px 120px;
 }
 
-/* Ornament */
+/* =========================
+     HEADER
+  ========================= */
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.header h1 {
+    margin: 0;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 46px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: #3F5145;
+}
+
+/* =========================
+   ORNAMENT
+========================= */
 
 .ornament {
     width: 100%;
     margin-top: 30px;
     position: relative;
     height: 15px;
+    color: #9A8FA8;
 }
-
 .ornament::before {
     content: "";
     position: absolute;
@@ -144,7 +160,6 @@ body {
     height: 1px;
     background: #222;
 }
-
 .ornament span {
     position: absolute;
     left: 50%;
@@ -157,83 +172,136 @@ body {
 }
 
 /* =========================
-   GALLERY
-========================= */
+     MASONRY GALLERY
+  ========================= */
 
 .gallery {
-    display: grid;
-    gap: 14px;
-    width: 100%;
-    transition: grid-template-columns 0.3s ease;
+    column-gap: 14px;
 }
-
 .gallery-item {
     width: 100%;
-    overflow: hidden;
+    margin-bottom: 14px;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
     cursor: pointer;
-    background: #f3f3f3;
-    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 10px;
 }
-
 .gallery-item img {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-
+    height: auto;
+    border-radius: 10px;
     transition:
-        transform 0.35s ease,
-        opacity 0.35s ease;
+        transform 0.3s ease,
+        opacity 0.3s ease;
 }
-
 .gallery-item:hover img {
-    transform: scale(1.03);
     opacity: 0.92;
+    transform: scale(1.015);
 }
 
 /* =========================
-   SLIDER
-========================= */
+     SLIDER
+  ========================= */
 
-.slider-wrapper {
-    margin-top: 35px;
-    width: 100%;
+.gallery-control {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 10px 18px;
+    background: rgba(244, 241, 232, 0.88);
+    border: 1px solid rgba(154, 143, 168, 0.442);
+    border-radius: 999px;
+    box-shadow: 0 6px 24px rgba(63, 81, 69, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1000;
 }
-
-.gallery-slider {
-    display: block;
-    width: 100%;
+.gallery-control input[type="range"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 160px;
+    height: 4px;
+    border-radius: 999px;
+    background: #cc92ff;
+    outline: none;
     cursor: pointer;
 }
-
-.slider-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-
-    font-size: 12px;
-    color: #777;
+.gallery-control input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #647565;
+    border: 3px solid #F4F1E8;
+    box-shadow: 0 2px 6px rgba(63, 81, 69, 0.25);
+    cursor: pointer;
+}
+.gallery-control input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #647565;
+    border: 3px solid #F4F1E8;
+    box-shadow: 0 2px 6px rgba(63, 81, 69, 0.25);
+    cursor: pointer;
+}
+.control-label {
+    font-family: "Montserrat", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #9A8FA8;
+    user-select: none;
 }
 
 /* =========================
-   MOBILE
-========================= */
+     MOBILE
+  ========================= */
 
 @media (max-width: 600px) {
-    .gallery-page {
-        padding: 25px 15px 50px;
+    .page {
+        padding: 40px 15px 100px;
     }
-
-    .gallery-header {
-        margin-bottom: 25px;
+    .header {
+        margin-bottom: 30px;
     }
-
-    .gallery-header h1 {
+    .header h1 {
         font-size: 38px;
+        letter-spacing: 1.5px;
     }
-
     .gallery {
-        gap: 8px;
+        column-gap: 8px;
     }
+    .gallery-item {
+        margin-bottom: 8px;
+    }
+    .gallery-control {
+        bottom: 16px;
+        padding: 9px 14px;
+        gap: 10px;
+    }
+    .gallery-control input[type="range"] {
+        width: 130px;
+    }
+    .control-label {
+        font-size: 17px;
+    }
+}
+
+:root {
+    --matcha-bg: #F4F1E8;
+    --matcha-soft: #E8EBDD;
+    --matcha: #647565;
+    --matcha-dark: #3F5145;
+    --taro: #9A8FA8;
+    --taro-soft: #C8C0CF;
+    --divider: #A8B2A1;
 }
 </style>
