@@ -48,7 +48,7 @@ export default {
             columns: 2,
             visible: false,
             lightboxIndex: 0,
-            imageCount: 12, // edit here
+            imageCount: 47, // edit here
         }
     },
     mounted() {
