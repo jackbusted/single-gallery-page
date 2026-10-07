@@ -10,25 +10,29 @@
         </section>
 
         <!-- Gallery -->
-        <section class="gallery" :style="{ columnCount: columns }">
-            <div v-for="(image, index) in images" :key="image.name" class="gallery-item" @click="openLightbox(index)">
-                <img :src="image.thumbnail" :alt="image.alt" loading="lazy" decoding="async">
+        <section class="gallery">
+            <div
+                v-for="(group, groupIndex) in imageGroups"
+                :key="groupIndex"
+                class="gallery-group"
+                :class="`gallery-group--${group.length}`"
+            >
+                <div
+                    v-for="(image, index) in group"
+                    :key="image.name"
+                    class="gallery-item"
+                    :class="`gallery-item--${index + 1}`"
+                    @click="openLightbox(image.originalIndex)"
+                >
+                    <img
+                        :src="image.thumbnail"
+                        :alt="image.alt"
+                        loading="lazy"
+                        decoding="async"
+                    >
+                </div>
             </div>
         </section>
-
-        <!-- Slider -->
-        <div class="gallery-control">
-            <span class="control-label">+</span>
-            <input
-                v-model.number="columns"
-                type="range"
-                min="1"
-                max="4"
-                step="1"
-                aria-label="Gallery size"
-            >
-            <span class="control-label">-</span>
-        </div>
 
         <!-- Lightbox -->
         <vue-easy-lightbox :visible="visible" :imgs="lightboxImages" :index="lightboxIndex" @hide="visible = false" />
@@ -45,7 +49,6 @@ export default {
     },
     data() {
         return {
-            columns: 2,
             visible: false,
             lightboxIndex: 0,
             imageCount: 47, // edit here
@@ -69,14 +72,25 @@ export default {
                 { length: this.imageCount },
                 (_, index) => {
                     const name = `image-${index + 1}`
+
                     return {
                         name,
                         thumbnail: `${process.env.BASE_URL}images/thumbnails/${name}.webp`,
                         original: `${process.env.BASE_URL}images/${name}.jpeg`,
+                        originalIndex: index,
                         alt: `Prewedding photo ${index + 1}`
                     }
                 }
             )
+        },
+        imageGroups() {
+            const groups = []
+
+            for (let i = 0; i < this.images.length; i += 5) {
+                groups.push(this.images.slice(i, i + 5))
+            }
+
+            return groups
         },
         lightboxImages() {
             return this.images.map(image => {
@@ -172,93 +186,181 @@ body {
 }
 
 /* =========================
-     MASONRY GALLERY
-  ========================= */
+   GALLERY
+========================= */
 
 .gallery {
-    column-gap: 14px;
-}
-.gallery-item {
     width: 100%;
-    margin-bottom: 14px;
-    break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-    cursor: pointer;
+    max-width: 760px;
+    margin: 0 auto;
+}
+.gallery-group {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.15;
+    margin-bottom: 55px;
+}
+
+/* =========================
+   GALLERY ITEM
+========================= */
+
+.gallery-item {
+    position: absolute;
     overflow: hidden;
+    cursor: pointer;
     border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(63, 81, 69, 0.10);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .gallery-item img {
     display: block;
     width: 100%;
-    height: auto;
-    border-radius: 10px;
-    transition:
-        transform 0.3s ease,
-        opacity 0.3s ease;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 7px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.gallery-item:hover {
+    box-shadow: 0 8px 22px rgba(63, 81, 69, 0.16);
 }
 .gallery-item:hover img {
-    opacity: 0.92;
-    transform: scale(1.015);
+    transform: scale(1.025);
+    opacity: 0.94;
 }
 
 /* =========================
-     SLIDER
-  ========================= */
+   FIVE IMAGE GROUP
+   ========================= */
 
-.gallery-control {
-    position: fixed;
+.gallery-group--5 .gallery-item--1 {
+    top: 0;
+    left: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--5 .gallery-item--2 {
+    top: 0;
+    right: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--5 .gallery-item--3 {
+  top: 26%;
+  left: 50%;
+  width: 44%;
+  height: 48%;
+  transform: translateX(-50%);
+  z-index: 3;
+
+  /* frame */
+  padding: 4px;
+  box-sizing: border-box;
+  background: #F4F1E8;
+  border: 1px solid #D8D4C9;
+  box-shadow: 0 6px 18px rgba(63, 81, 69, 0.16);
+}
+.gallery-group--5 .gallery-item--3:hover {
+  transform: translateX(-50%) scale(1.015);
+}
+.gallery-group--5 .gallery-item--4 {
+    bottom: 0;
+    left: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--5 .gallery-item--5 {
+    bottom: 0;
+    right: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--5 .gallery-item--3:hover {
+    transform: translateX(-50%) scale(1.015);
+}
+
+/* =========================
+   FOUR IMAGE GROUP
+========================= */
+
+.gallery-group--4 .gallery-item--1 {
+    top: 0;
+    left: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--4 .gallery-item--2 {
+    top: 0;
+    right: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--4 .gallery-item--3 {
+    bottom: 0;
+    left: 0;
+    width: 47%;
+    height: 47%;
+}
+.gallery-group--4 .gallery-item--4 {
+    bottom: 0;
+    right: 0;
+    width: 47%;
+    height: 47%;
+}
+
+/* =========================
+   THREE IMAGE GROUP
+========================= */
+
+.gallery-group--3 .gallery-item--1 {
+    top: 0;
+    left: 29%;
+    width: 42%;
+    height: 52%;
+}
+.gallery-group--3 .gallery-item--2 {
+    bottom: 0;
+    left: 0;
+    width: 42%;
+    height: 48%;
+}
+.gallery-group--3 .gallery-item--3 {
+    bottom: 0;
+    right: 0;
+    width: 42%;
+    height: 48%;
+}
+
+/* =========================
+   TWO IMAGE GROUP
+========================= */
+
+.gallery-group--2 .gallery-item--1 {
+    top: 10%;
+    left: 5%;
+    width: 42%;
+    height: 70%;
+}
+.gallery-group--2 .gallery-item--2 {
+    top: 10%;
+    right: 5%;
+    width: 42%;
+    height: 70%;
+}
+
+/* =========================
+   ONE IMAGE GROUP
+========================= */
+
+.gallery-group--1 .gallery-item--1 {
+    top: 10%;
     left: 50%;
-    bottom: 24px;
+    width: 55%;
+    height: 70%;
     transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 10px 18px;
-    background: rgba(244, 241, 232, 0.88);
-    border: 1px solid rgba(154, 143, 168, 0.442);
-    border-radius: 999px;
-    box-shadow: 0 6px 24px rgba(63, 81, 69, 0.12);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    z-index: 1000;
 }
-.gallery-control input[type="range"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 160px;
-    height: 4px;
-    border-radius: 999px;
-    background: #cc92ff;
-    outline: none;
-    cursor: pointer;
-}
-.gallery-control input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #647565;
-    border: 3px solid #F4F1E8;
-    box-shadow: 0 2px 6px rgba(63, 81, 69, 0.25);
-    cursor: pointer;
-}
-.gallery-control input[type="range"]::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #647565;
-    border: 3px solid #F4F1E8;
-    box-shadow: 0 2px 6px rgba(63, 81, 69, 0.25);
-    cursor: pointer;
-}
-.control-label {
-    font-family: "Montserrat", sans-serif;
-    font-size: 18px;
-    font-weight: 400;
-    color: #9A8FA8;
-    user-select: none;
+.gallery-group--1 .gallery-item--1:hover {
+    transform: translateX(-50%) scale(1.015);
 }
 
 /* =========================
@@ -279,19 +381,14 @@ body {
     .gallery {
         column-gap: 8px;
     }
+    .gallery-group {
+        margin-bottom: 35px;
+    }
     .gallery-item {
-        margin-bottom: 8px;
+        border-radius: 8px;
     }
-    .gallery-control {
-        bottom: 16px;
-        padding: 9px 14px;
-        gap: 10px;
-    }
-    .gallery-control input[type="range"] {
-        width: 130px;
-    }
-    .control-label {
-        font-size: 17px;
+    .gallery-item img {
+        border-radius: 8px;
     }
 }
 
