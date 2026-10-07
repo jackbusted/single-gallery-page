@@ -10,9 +10,25 @@
         </section>
 
         <!-- Gallery -->
-        <section class="gallery" :style="{ columnCount: columns }">
-            <div v-for="(image, index) in images" :key="image.name" class="gallery-item" @click="openLightbox(index)">
-                <img :src="image.thumbnail" :alt="image.alt" loading="lazy" decoding="async">
+        <section class="gallery">
+            <div
+                v-for="(column, columnIndex) in galleryColumns"
+                :key="columnIndex"
+                class="gallery-column"
+            >
+                <div
+                    v-for="image in column"
+                    :key="image.name"
+                    class="gallery-item"
+                    @click="openLightbox(image.originalIndex)"
+                >
+                    <img
+                        :src="image.thumbnail"
+                        :alt="image.alt"
+                        loading="lazy"
+                        decoding="async"
+                    >
+                </div>
             </div>
         </section>
 
@@ -48,7 +64,7 @@ export default {
             columns: 2,
             visible: false,
             lightboxIndex: 0,
-            imageCount: 47, // edit here
+            imageCount: 49, // edit here
         }
     },
     mounted() {
@@ -69,14 +85,25 @@ export default {
                 { length: this.imageCount },
                 (_, index) => {
                     const name = `image-${index + 1}`
+
                     return {
                         name,
                         thumbnail: `${process.env.BASE_URL}images/thumbnails/${name}.webp`,
                         original: `${process.env.BASE_URL}images/${name}.jpeg`,
+                        originalIndex: index,
                         alt: `Prewedding photo ${index + 1}`
                     }
                 }
             )
+        },
+        galleryColumns() {
+            const columns = [[], []]
+
+            this.images.forEach((image, index) => {
+                columns[index % 2].push(image)
+            })
+
+            return columns
         },
         lightboxImages() {
             return this.images.map(image => {
@@ -176,7 +203,16 @@ body {
   ========================= */
 
 .gallery {
-    column-gap: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+.gallery-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 .gallery-item {
     width: 100%;
@@ -192,9 +228,7 @@ body {
     width: 100%;
     height: auto;
     border-radius: 10px;
-    transition:
-        transform 0.3s ease,
-        opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .gallery-item:hover img {
     opacity: 0.92;
@@ -278,6 +312,9 @@ body {
     }
     .gallery {
         column-gap: 8px;
+    }
+    .gallery-column {
+        gap: 8px;
     }
     .gallery-item {
         margin-bottom: 8px;
