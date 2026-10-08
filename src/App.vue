@@ -91,7 +91,7 @@ export default {
                         thumbnail: `${process.env.BASE_URL}images/thumbnails/${name}.webp`,
                         original: `${process.env.BASE_URL}images/${name}.jpeg`,
                         originalIndex: index,
-                        alt: `Prewedding photo ${index + 1}`
+                        alt: `photo ${index + 1}`
                     }
                 }
             )
